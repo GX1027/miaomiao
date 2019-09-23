@@ -5,10 +5,10 @@
     <Scroller v-else>
       <ul>
         <li v-for="comingMovie in comingList" :key="comingMovie.id">
-          <div class="pic_show">
+          <div class="pic_show" @tap="handleToDetail(comingMovie.id)">
             <img :src="comingMovie.img | setWH('128.180')" />
           </div>
-          <div class="info_list">
+          <div class="info_list" @tap="handleToDetail(comingMovie.id)">
             <h2>{{ comingMovie.nm }}</h2>
             <p>
               <span class="person">{{ comingMovie.wish }}</span> 人想看
@@ -47,6 +47,11 @@ export default {
         this.prevCityId = cityId
       }
     })
+  },
+  methods: {
+    handleToDetail(comingMovieId) {
+      this.$router.push("/movie/detail/2/" + comingMovieId)
+    }
   }
 }
 </script>
