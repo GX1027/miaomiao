@@ -1,7 +1,8 @@
 <!-- header -->
 <template>
   <header id="header">
-    <h1>{{title}}</h1>
+    <slot></slot>
+    <h1>{{ title }}</h1>
   </header>
 </template>
 
@@ -15,9 +16,9 @@ export default {
     }
   },
   data() {
-    return {};
+    return {}
   }
-};
+}
 </script>
 
 <style scoped>
