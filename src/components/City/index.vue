@@ -2,28 +2,47 @@
 <template>
   <div class="city_body">
     <div class="city_list">
-      <div class="city_hot">
-        <h2>热门城市</h2>
-        <ul class="clearfix">
-          <li v-for="item in hotList" :key="item.id">{{item.nm}}</li>
-        </ul>
-      </div>
-      <div class="city_sort" ref="city_sort">
-        <div v-for="item in cityList" :key="item.index">
-          <h2>{{item.index}}</h2>
-          <ul>
-            <li v-for="itemList in item.list" :key="itemList.id">{{itemList.nm}}</li>
-          </ul>
+      <Loading v-if="isLoading" />
+      <Scroller v-else ref="city_list">
+        <div>
+          <div class="city_hot">
+            <h2>热门城市</h2>
+            <ul class="clearfix">
+              <li
+                v-for="item in hotList"
+                :key="item.id"
+                @tap="handleToCity(item.nm, item.id)"
+              >
+                {{ item.nm }}
+              </li>
+            </ul>
+          </div>
+          <div class="city_sort" ref="city_sort">
+            <div v-for="item in cityList" :key="item.index">
+              <h2>{{ item.index }}</h2>
+              <ul>
+                <li
+                  v-for="itemList in item.list"
+                  :key="itemList.id"
+                  @tap="handleToCity(itemList.nm, itemList.id)"
+                >
+                  {{ itemList.nm }}
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
-      </div>
+      </Scroller>
     </div>
     <div class="city_index">
       <ul>
         <li
-          v-for="(item,index) in cityList"
+          v-for="(item, index) in cityList"
           :key="item.index"
           @touchstart="handleToIndex(index)"
-        >{{item.index}}</li>
+        >
+          {{ item.index }}
+        </li>
       </ul>
     </div>
   </div>
@@ -36,42 +55,54 @@ export default {
   data() {
     return {
       cityList: [],
-      hotList: []
-    };
+      hotList: [],
+      isLoading: true
+    }
   },
   mounted() {
-    this.axios.get("/api/cityList").then(res => {
-      const { msg } = res.data;
-      if (msg === "ok") {
-        const { cities } = res.data.data;
-        const { cityList, hotList } = this.formatCityList(cities);
-        this.cityList = cityList;
-        this.hotList = hotList;
-      }
-    });
+    const cityList = window.localStorage.getItem("cityList")
+    const hotList = window.localStorage.getItem("hotList")
+    if (cityList && hotList) {
+      this.cityList = JSON.parse(cityList)
+      this.hotList = JSON.parse(hotList)
+      this.isLoading = false
+    } else {
+      this.axios.get("/api/cityList").then(res => {
+        const { msg } = res.data
+        if (msg === "ok") {
+          const { cities } = res.data.data
+          const { cityList, hotList } = this.formatCityList(cities)
+          this.cityList = cityList
+          this.hotList = hotList
+          this.isLoading = false
+          window.localStorage.setItem("cityList", JSON.stringify(cityList))
+          window.localStorage.setItem("hotList", JSON.stringify(hotList))
+        }
+      })
+    }
   },
   methods: {
     formatCityList(cities) {
-      const cityList = [];
-      const hotList = [];
+      const cityList = []
+      const hotList = []
       //热门城市
       for (let i = 0; i < cities.length; i++) {
         if (cities[i].isHot === 1) {
-          hotList.push(cities[i]);
+          hotList.push(cities[i])
         }
       }
       //根据字母分组
       for (var i = 0; i < cities.length; i++) {
-        var firstLetter = cities[i].py.substring(0, 1).toUpperCase();
+        var firstLetter = cities[i].py.substring(0, 1).toUpperCase()
         if (toCom(firstLetter)) {
           cityList.push({
             index: firstLetter,
             list: [{ nm: cities[i].nm, id: cities[i].id }]
-          });
+          })
         } else {
           for (var j = 0; j < cityList.length; j++) {
             if (cityList[j].index === firstLetter) {
-              cityList[j].list.push({ nm: cities[i].nm, id: cities[i].id });
+              cityList[j].list.push({ nm: cities[i].nm, id: cities[i].id })
             }
           }
         }
@@ -79,27 +110,34 @@ export default {
 
       cityList.sort((n1, n2) => {
         if (n1.index > n2.index) {
-          return 1;
+          return 1
         } else if (n1.index < n2.index) {
-          return -1;
+          return -1
         }
-      });
+      })
       function toCom(firstLetter) {
         for (let i = 0; i < cityList.length; i++) {
           if (cityList[i].index === firstLetter) {
-            return false;
+            return false
           }
         }
-        return true;
+        return true
       }
-      return { cityList, hotList };
+      return { cityList, hotList }
     },
     handleToIndex(index) {
-      const h2 = this.$refs.city_sort.getElementsByTagName("h2");
-      this.$refs.city_sort.parentNode.scrollTop = h2[index].offsetTop;
+      const h2 = this.$refs.city_sort.getElementsByTagName("h2")
+      //this.$refs.city_sort.parentNode.scrollTop = h2[index].offsetTop
+      this.$refs.city_list.toScrollTop(-h2[index].offsetTop)
+    },
+    handleToCity(nm, id) {
+      this.$store.commit("city/CITY_INFO", { nm, id })
+      window.localStorage.setItem("nowNm", nm)
+      window.localStorage.setItem("nowId", id)
+      this.$router.push("/movie/nowplaying")
     }
   }
-};
+}
 </script>
 
 <style scoped>

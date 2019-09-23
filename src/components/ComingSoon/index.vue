@@ -1,22 +1,25 @@
 <!-- comingsoon -->
 <template>
   <div class="movie_body">
-    <ul>
-      <li v-for="comingMovie in comingList" :key="comingMovie.id">
-        <div class="pic_show">
-          <img :src="comingMovie.img|setWH('128.180')" />
-        </div>
-        <div class="info_list">
-          <h2>{{comingMovie.nm}}</h2>
-          <p>
-            <span class="person">{{comingMovie.wish}}</span> 人想看
-          </p>
-          <p>主演:{{comingMovie.star}}</p>
-          <p>{{comingMovie.showInfo}}</p>
-        </div>
-        <div class="btn_pre">预售</div>
-      </li>
-    </ul>
+    <Loading v-if="isLoading" />
+    <Scroller v-else>
+      <ul>
+        <li v-for="comingMovie in comingList" :key="comingMovie.id">
+          <div class="pic_show">
+            <img :src="comingMovie.img | setWH('128.180')" />
+          </div>
+          <div class="info_list">
+            <h2>{{ comingMovie.nm }}</h2>
+            <p>
+              <span class="person">{{ comingMovie.wish }}</span> 人想看
+            </p>
+            <p>主演:{{ comingMovie.star }}</p>
+            <p>{{ comingMovie.showInfo }}</p>
+          </div>
+          <div class="btn_pre">预售</div>
+        </li>
+      </ul>
+    </Scroller>
   </div>
 </template>
 
@@ -26,18 +29,26 @@ export default {
   components: {},
   data() {
     return {
-      comingList: []
-    };
+      comingList: [],
+      isLoading: true,
+      prevCityId: -1
+    }
   },
-  mounted() {
-    this.axios.get("/api/movieComingList?cityId=10").then(res => {
-      const msg = res.data.msg;
+  activated() {
+    const cityId = this.$store.state.city.id
+    if (this.prevCityId === cityId) {
+      return
+    }
+    this.axios.get("/api/movieComingList?cityId=" + cityId).then(res => {
+      const msg = res.data.msg
       if (msg === "ok") {
-        this.comingList = res.data.data.comingList;
+        this.comingList = res.data.data.comingList
+        this.isLoading = false
+        this.prevCityId = cityId
       }
-    });
+    })
   }
-};
+}
 </script>
 
 <style scoped>
