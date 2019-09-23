@@ -12,16 +12,16 @@
       <ul>
         <li v-for="movie in movieList" :key="movie.id">
           <div class="img">
-            <img :src="movie.img|setWH('128.180')" />
+            <img :src="movie.img | setWH('128.180')" />
           </div>
           <div class="info">
             <p>
-              <span>{{movie.nm}}</span>
-              <span>{{movie.sc}}</span>
+              <span>{{ movie.nm }}</span>
+              <span>{{ movie.sc }}</span>
             </p>
-            <p>{{movie.enm}}</p>
-            <p>{{movie.cat}}</p>
-            <p>{{movie.rt}}</p>
+            <p>{{ movie.enm }}</p>
+            <p>{{ movie.cat }}</p>
+            <p>{{ movie.rt }}</p>
           </div>
         </li>
       </ul>
@@ -37,43 +37,44 @@ export default {
     return {
       keyword: "",
       movieList: []
-    };
+    }
   },
   methods: {
     cancelRequest() {
       if (typeof this.source === "function") {
-        this.source("终止请求");
+        this.source("终止请求")
       }
     }
   },
   watch: {
     keyword(newValue) {
-      var that = this;
-      this.cancelRequest();
+      const cityId = this.$store.state.city.id
+      var that = this
+      this.cancelRequest()
       this.axios
-        .get("/api/searchList?cityId=10&kw=" + newValue, {
+        .get("/api/searchList?cityId=" + cityId + "&kw=" + newValue, {
           cancelToken: new this.axios.CancelToken(function executor(c) {
-            that.source = c;
+            that.source = c
           })
         })
         .then(res => {
-          const msg = res.data.msg;
-          const movies = res.data.data.movies;
+          const msg = res.data.msg
+          const movies = res.data.data.movies
           if (msg && movies) {
-            this.movieList = movies.list;
+            this.movieList = movies.list
           }
         })
         .catch(err => {
           if (axios.isCancel(err)) {
-            console.log("Rquest canceled", err.message); //请求如果被取消，这里是返回取消的message
+            console.log("Rquest canceled", err.message) //请求如果被取消，这里是返回取消的message
           } else {
             //handle error
-            console.log(err);
+            console.log(err)
           }
-        });
+        })
     }
   }
-};
+}
 </script>
 
 <style scoped>
