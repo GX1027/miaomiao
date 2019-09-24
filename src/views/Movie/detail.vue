@@ -7,11 +7,17 @@
     <Loading v-if="isLoading" />
     <div id="content" class="contentDetail" v-else>
       <div class="detail_list">
-        <div class="detail_list_bg"></div>
+        <div
+          class="detail_list_bg"
+          :style="{
+            'background-image':
+              'url(' + detailMovie.img.replace(/w\.h/, '148.208') + ')'
+          }"
+        ></div>
         <div class="detail_list_filter"></div>
         <div class="detail_list_content">
           <div class="detail_list_img">
-            <img :src="detailMovie.albumImg" alt="albumImg" />
+            <img :src="detailMovie.img | setWH(148.208)" alt="albumImg" />
           </div>
           <div class="detail_list_info">
             <h2>{{ detailMovie.nm }}</h2>
@@ -38,9 +44,6 @@
             <div>
               <img :src="item | setWH(140.127)" alt="img" />
             </div>
-            <p v-for="(movieStar, index) in detailMovie.star" :key="index">
-              {{ movieStar }}
-            </p>
           </li>
         </ul>
       </div>
@@ -118,7 +121,7 @@ export default {
 .detail_list .detail_list_bg {
   width: 100%;
   height: 100%;
-  background: url(/images/movie_1.jpg) 0 40%;
+  background: 0 40%;
   filter: blur(20px);
   background-size: cover;
   position: absolute;
